@@ -8,36 +8,67 @@ public class AudioManager : MonoBehaviour
     
     public static AudioManager Instance {get; private set; }
     public AudioSource effectsSource;
+    public AudioSource voiceSource;
+    
     public AudioClip[] comboEffects;
     public AudioClip undoSound;
 
     public AudioClip selectSound;
-    public AudioClip maxComboVoice;
+
+    public AudioClip[] comboVoices;
     public AudioClip swapSound;
     
+    public AudioClip ItemButtonSound;
+    public AudioClip[] ItemsSounds;
+    public AudioClip[] ItemsVoices;
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            //DontDestroyOnLoad(gameObject);
+           
         }
         else
         {
             Destroy(gameObject);
         }
     }
+    
+    public void PlayItemsSounds(int itemNumber)
+    {
+        if (itemNumber < ItemsSounds.Length && itemNumber < ItemsVoices.Length)
+        {
+            PlaySoundEffect(ItemsSounds[itemNumber]);
+            PlayVoice(ItemsVoices[itemNumber]);
+        }
+        else
+        {
+            Debug.Log("itemNumber too Long");
+        }
+        
+    }
 
+    public void PlayButtonSound()
+    {
+        PlaySoundEffect(ItemButtonSound);
+    }
 
-    public void PlaySelectSoubd()
+    public void PlaySelectSound()
     {
         PlaySoundEffect(selectSound);
     }
     
-    public void PlayMaxComboSound()
+    public void PlayMaxComboSound(int curruntCombo)
     {
+        if (curruntCombo < comboVoices.Length)
+        {
+            PlayVoice(comboVoices[curruntCombo]);
+        }
+        else
+        {
+            PlayVoice(comboVoices[2]);
+        }
         
-        PlaySoundEffect(maxComboVoice);
         
     }
 
@@ -49,7 +80,7 @@ public class AudioManager : MonoBehaviour
     {
         PlaySoundEffect(undoSound);
     }
-    public void playComboSound(int currentCombo)
+    public void PlayComboSound(int currentCombo)
     {
         if (comboEffects.Length > currentCombo)
         {
@@ -61,8 +92,12 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    private void PlayVoice(AudioClip clip)
+    {
+        if(clip != null) voiceSource?.PlayOneShot(clip);
+    }
     private void PlaySoundEffect(AudioClip clip)
     {
-        if(clip != null) effectsSource.PlayOneShot(clip);
+        if(clip != null) effectsSource?.PlayOneShot(clip);
     }
 }

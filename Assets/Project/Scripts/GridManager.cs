@@ -11,7 +11,8 @@ public class GridManager : MonoBehaviour
     public Transform gridParent; // 그리드 부모 오브젝트
     public float borderSize = 0.25f;
     private GameObject[,] gridArray; // 그리드 배열
-    
+
+    public Sprite IceBlock;
     
     
 
@@ -70,10 +71,8 @@ public class GridManager : MonoBehaviour
         }
     }
     
-    
-    public void ResetGrid()
+    public void ClearAllBlocks()
     {
-        // 기존 그리드의 모든 블록 제거
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -85,16 +84,33 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
+    }
 
-        // 테두리 제거
-        foreach (Transform child in gridParent)
+    public void ClearCrossBlock()
+    {
+        for (int x = 0; x < width; x++)
         {
-            if (child.CompareTag("Border"))
+            for (int y = 0; y < height; y++)
             {
-                Destroy(child.gameObject);
+
+                if ((x > width / 2 - 2 && x < width / 2 + 1) || (y > height / 2 - 2 && y < height / 2 + 1))
+                {
+                    if (gridArray[x, y] != null )
+                    {
+                        gridArray[x, y].GetComponent<SpriteRenderer>().sprite = IceBlock;
+                        gridArray[x, y].tag = "Ice";
+                    }
+                }
+
             }
         }
-
+    }
+    
+    public void ResetGrid()
+    {
+        // 기존 그리드의 모든 블록 제거
+        ClearAllBlocks();
+        
         // 새로운 그리드 생성
         CreateGrid();
         CreateBorder();

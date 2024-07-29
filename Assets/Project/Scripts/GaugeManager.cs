@@ -1,11 +1,14 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
+using UnityEngine.Serialization;
 
 public class GaugeManager : MonoBehaviour
 {
     public static GaugeManager Instance { get; private set; }
 
-    public float timerDuration = 30f;
+    public float timeLimit = 30f;
     private float timeRemaining;
 
     [SerializeField] private RectTransform maskTransform;
@@ -16,12 +19,15 @@ public class GaugeManager : MonoBehaviour
 
     private bool isInitializing = false;
 
+    private Coroutine fillCoroutine = null;
+
+    private float targetGauge;
+    public float fillDuration = 0.25f; 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            //DontDestroyOnLoad(gameObject);
         }
         else if (Instance != this)
         {
@@ -29,19 +35,26 @@ public class GaugeManager : MonoBehaviour
             return;
         }
 
+       
+    }
+
+    private void Start()
+    {
         InitializeGauge();
     }
+
     public void UpdateTimer(float currentTime)
     {
-        timeRemaining = currentTime;
-        UpdateGauge(timeRemaining, timerDuration);
+        AddGauge(currentTime);
     }
     private void InitializeGauge()
     {
+        timeLimit = GameManager.Instance.timeLimit;
+        
         if (isInitializing) return;
         isInitializing = true;
 
-        // Find references if they are not set
+      
         if (maskTransform == null)
             maskTransform = transform.Find("Mask")?.GetComponent<RectTransform>();
         if (backgroundTransform == null)
@@ -53,8 +66,8 @@ public class GaugeManager : MonoBehaviour
             maxHeight = backgroundTransform.sizeDelta.y;
         }
 
-        timeRemaining = timerDuration;
-        UpdateGaugeWithoutCheck(timeRemaining, timerDuration);
+        timeRemaining = timeLimit;
+        UpdateGaugeWithoutCheck(timeRemaining, timeLimit);
 
         isInitializing = false;
     }
@@ -64,12 +77,12 @@ public class GaugeManager : MonoBehaviour
         if (timeRemaining > 0)
         {
             timeRemaining -= Time.deltaTime;
-            UpdateGauge(timeRemaining, timerDuration);
+            UpdateGauge(timeRemaining, timeLimit);
         }
         else
         {
             timeRemaining = 0;
-            UpdateGauge(timeRemaining, timerDuration);
+            UpdateGauge(timeRemaining, timeLimit);
         }
     }
 
@@ -93,13 +106,50 @@ public class GaugeManager : MonoBehaviour
 
     public void ResetTimer()
     {
-        timeRemaining = timerDuration;
+        timeRemaining = timeLimit;
         InitializeGauge();
     }
 
     public void SetTimerDuration(float newDuration)
     {
-        timerDuration = newDuration;
+        timeLimit = newDuration;
         ResetTimer();
+    }
+    
+    
+    public void AddGauge(float amount)
+    {
+
+        targetGauge = Mathf.Min(amount, timeLimit);
+        // 이미 실행 중인 코루틴이 있다면 중지
+        if (fillCoroutine != null)
+        {
+            StopCoroutine(fillCoroutine);
+        }
+        
+        // 새 코루틴 시작
+        fillCoroutine = StartCoroutine(FillTimeSmooth());
+
+        
+    }
+
+    private IEnumerator FillTimeSmooth()
+    {
+        float elapsedTime = 0f;
+        float startGauge = timeRemaining;
+        float endGauge = targetGauge;
+
+        while (elapsedTime < fillDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / fillDuration;
+            timeRemaining = Mathf.Lerp(startGauge, endGauge, t);
+            UpdateGauge(timeRemaining,timeLimit);
+            yield return null;
+        }
+
+        timeRemaining = endGauge;
+        UpdateGauge(timeRemaining,timeLimit);
+        fillCoroutine = null;
     }
 }

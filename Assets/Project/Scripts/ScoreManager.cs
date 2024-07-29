@@ -10,7 +10,7 @@ public class ScoreManager : MonoBehaviour
     public static ScoreManager Instance { get; private set; }
     
     public TextMeshProUGUI scoreText;
-    private int score;
+    [SerializeField] int score = 0;
 
 
     private void Awake()
@@ -18,7 +18,6 @@ public class ScoreManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {

@@ -13,6 +13,9 @@ TagManager:
   - Orange
   - Yellow
   - Cream
+  - Border
+  - UseItem
+  - Ice
   layers:
   - Default
   - TransparentFX

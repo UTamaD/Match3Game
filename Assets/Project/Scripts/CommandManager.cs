@@ -23,13 +23,13 @@ public class SwapCommand : ICommand
 
     public void Execute()
     {
+        CommandManager.Instance.StartCoroutine(SwapWithAnimation(piece1, piece2));
         AudioManager.Instance.PlaySwapSound();
-        GridManager.Instance.StartCoroutine(SwapWithAnimation(piece1, piece2));
     }
 
     public void Undo()
     {
-        GridManager.Instance.StartCoroutine(SwapWithAnimation(piece2, piece1));
+        CommandManager.Instance.StartCoroutine(SwapWithAnimation(piece2, piece1));
         AudioManager.Instance.PlayUndoSound();
     }
 
@@ -65,7 +65,7 @@ public class CommandManager : MonoBehaviour
 {
     public static CommandManager Instance { get; private set; }
 
-    private Stack<ICommand> commandStack = new Stack<ICommand>();
+    private Stack<ICommand> commandStack = new();
 
     private void Awake()
     {

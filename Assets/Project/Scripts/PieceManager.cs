@@ -18,7 +18,7 @@ public class PieceManager : MonoBehaviour
     public bool IsPieceMoving { get; private set; }
     public GameObject disappearEffectPrefab;
     public GameObject comboEffectPrefab;
-
+    public GameObject explodeEffectPrefab;
     private int currentCombo = 0;
 
 
@@ -29,7 +29,7 @@ public class PieceManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            //DontDestroyOnLoad(gameObject);
+           
         }
         else
         {
@@ -67,14 +67,15 @@ public class PieceManager : MonoBehaviour
 
         // 삭제 이펙트 생성
         Instantiate(disappearEffectPrefab, piece.transform.position, Quaternion.identity);
-
-
-
-        AudioManager.Instance.playComboSound(currentCombo);
+        
         Destroy(piece);
         
         
         ScoreManager.Instance.AddScore(currentCombo);
+        
+        // 아이템 게이지 증가
+        string pieceTag = piece.tag;
+        ItemManager.Instance.AddGauge(pieceTag, 10f);
     }
     public void SwapPieces(GameObject piece1, GameObject piece2)
     {
@@ -95,15 +96,27 @@ public class PieceManager : MonoBehaviour
     {
         currentCombo = Mathf.Min(currentCombo + 1, 3);
 
-        if (currentCombo >= 3)
+
+        if (currentCombo == 1)
         {
-            AudioManager.Instance.PlayMaxComboSound();
+
+        }
+        else if (currentCombo == 2)
+        {
+            CharacterManager.Instance.SetImage(5,0.2f);
+            AudioManager.Instance.PlayMaxComboSound(1);
+        }
+        else if (currentCombo >= 3)
+        {
+            CharacterManager.Instance.SetImage(6,0.2f);
+            AudioManager.Instance.PlayMaxComboSound(2);
         }
     }
 
 
     public void ResetCombo()
     {
+        CharacterManager.Instance.SetImage(0,0.0f);   
         currentCombo = 0;
     }
     
@@ -114,7 +127,7 @@ public class PieceManager : MonoBehaviour
         var initialMatches = MatchManager.Instance.FindMatchesFromMove(piece1, piece2);
         if (initialMatches.Count > 0)
         {
-            // 매치된 조각들 즉시 강조
+            // 매치된 조각 강조
             foreach (var match in initialMatches)
             {
                 match.GetComponent<Piece>().HighlightPiece(true);
@@ -160,26 +173,29 @@ public class PieceManager : MonoBehaviour
             Vector2 index = match.GetComponent<Piece>().index;
             GridManager.Instance.SetPieceAt((int)index.x, (int)index.y, null);
             HandlePieceDisappearance(match);
+            //AudioManager.Instance.PlayComboSound(currentCombo);
         }
-
+        AudioManager.Instance.PlayComboSound(currentCombo);
         // 점수 업데이트
         int points = matches.Count * 5;
         ScoreManager.Instance.AddScore(points);
         GameManager.Instance.AddTime(matches.Count * 0.1f * (currentCombo+1));
 
+
         yield return new WaitForSeconds(0.1f);
         smoothShake.StopShake();
         IsPieceMoving = true;
-        yield return StartCoroutine(DropPieces()); // 조각 떨어뜨리기
+        yield return StartCoroutine(DropPieces()); // 조각 낙하
 
         yield return new WaitForSeconds(dropSpeed);
-        var additionalMatches = MatchManager.Instance.FindAllMatches(); // 새로운 매치 검색
+        var additionalMatches = MatchManager.Instance.FindAllMatches(); // 매치 탐색
         if (additionalMatches.Count > 0)
         {
             yield return ClearAndDropPieces(additionalMatches);
         }
         else
         {
+            ResetCombo();
             IsPieceMoving = false;
         }
     }
@@ -213,7 +229,7 @@ public class PieceManager : MonoBehaviour
             }
         }
 
-        // 모든 조각을 동시에 떨어뜨리기 위한 애니메이션
+        // 애니메이션
         float elapsedTime = 0;
         while (elapsedTime < dropSpeed)
         {
@@ -233,7 +249,7 @@ public class PieceManager : MonoBehaviour
             if (piece != null) piece.transform.position = targetPosition;
         }
         IncreaseCombo();
-        // 빈 공간을 채우기 위해 새 조각을 생성합니다.
+        // 빈 공간을 채우기 위해 새 조각을 생성
         FillEmptySpaces();
     }
 
@@ -259,7 +275,7 @@ public class PieceManager : MonoBehaviour
             }
         }
 
-        // 모든 새 조각을 동시에 떨어뜨리기 위한 애니메이션
+        // 모든 조각 낙하 애니메이션
         StartCoroutine(AnimateDrop(newPieces));
     }
 
@@ -286,18 +302,18 @@ public class PieceManager : MonoBehaviour
         }
     }
 
-    // 조각의 하이라이트를 해제하는 함수
+    // 선택한 조각의 하이라이트를 해제
     private void UnhighlightPieces(GameObject piece1, GameObject piece2)
     {
 
             if (piece1 != null)
             {
-                piece1.GetComponent<Renderer>().material.SetFloat("_OutlineEnabled",0.0f);
+                piece1.GetComponent<Piece>().HighlightPiece(false);
             }
 
             if (piece2 != null)
             {
-                piece2.GetComponent<Renderer>().material.SetFloat("_OutlineEnabled",0.0f);
+                piece2.GetComponent<Piece>().HighlightPiece(false);
             }
 
 
@@ -315,5 +331,91 @@ public class PieceManager : MonoBehaviour
         }
 
         return sum / matches.Count;
+    }
+    
+     public IEnumerator ClearAllAndDropNew()
+    {
+        
+        
+        ResetCombo();
+        
+        
+        GameObject effect = Instantiate(explodeEffectPrefab, new Vector3(4,4,0), Quaternion.identity);
+        Destroy(effect, 1.0f);
+    
+        
+        
+        // 모든 블록 지우기
+        GridManager.Instance.ClearAllBlocks();
+
+        // 새로운 블록 생성 및 떨어뜨리기
+        List<GameObject> newPieces = new List<GameObject>();
+
+        for (int x = 0; x < GridManager.Instance.width; x++)
+        {
+            for (int y = 0; y < GridManager.Instance.height; y++)
+            {
+                Vector3 spawnPosition = new Vector3(x, GridManager.Instance.height + y, 0);
+                int pieceIndex = Random.Range(0, GridManager.Instance.pieces.Length);
+                GameObject newPiece = Instantiate(GridManager.Instance.pieces[pieceIndex], spawnPosition, Quaternion.identity, GridManager.Instance.gridParent);
+                newPiece.GetComponent<Piece>().index = new Vector2(x, y);
+                GridManager.Instance.SetPieceAt(x, y, newPiece);
+                newPieces.Add(newPiece);
+            }
+        }
+
+        // 블록 떨어뜨리기 애니메이션
+        yield return StartCoroutine(DropNewPieces(newPieces));
+
+        // 매치 확인 및 처리
+        List<GameObject> matches = MatchManager.Instance.FindAllMatches();
+        if (matches.Count > 0)
+        {
+            yield return StartCoroutine(ClearAndDropPieces(matches));
+        }
+    }
+     
+     
+     
+    public IEnumerator ClearCrossDrop()
+    {
+        ResetCombo();
+        // 블록 지우기
+        GridManager.Instance.ClearCrossBlock();
+        yield return new WaitForSeconds(0.1f);
+        
+        
+        List<GameObject> matches = MatchManager.Instance.FindAllMatches();
+        if (matches.Count > 0)
+        {
+            yield return StartCoroutine(ClearAndDropPieces(matches));
+        }
+    }
+
+    private IEnumerator DropNewPieces(List<GameObject> pieces)
+    {
+        float elapsedTime = 0f;
+        float dropDuration = 1.5f; // 떨어지는 시간 조절
+
+        while (elapsedTime < dropDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / dropDuration;
+
+            foreach (GameObject piece in pieces)
+            {
+                Vector3 startPos = piece.transform.position;
+                Vector3 endPos = new Vector3(piece.GetComponent<Piece>().index.x, piece.GetComponent<Piece>().index.y, 0);
+                piece.transform.position = Vector3.Lerp(startPos, endPos, t);
+            }
+
+            yield return null;
+        }
+
+        // 최종 위치 설정
+        foreach (GameObject piece in pieces)
+        {
+            piece.transform.position = new Vector3(piece.GetComponent<Piece>().index.x, piece.GetComponent<Piece>().index.y, 0);
+        }
     }
 }

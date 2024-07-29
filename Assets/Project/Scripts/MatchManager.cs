@@ -18,7 +18,7 @@ public class MatchManager : MonoBehaviour
         }
     }
 
-    // 이동에 의해 발생한 매치 탐색
+    // 이동 매치 탐색
     public List<GameObject> FindMatchesFromMove(GameObject piece1, GameObject piece2)
     {
 
@@ -31,17 +31,16 @@ public class MatchManager : MonoBehaviour
         return new List<GameObject>(matches);
     }
 
-    // 그리드 전체에서 매치 탐색
+    // 그리드 전체 매치 탐색
     public List<GameObject> FindAllMatches()
     {
-        var gridManager = GridManager.Instance; // Singleton 사용
         HashSet<GameObject> matches = new HashSet<GameObject>();
 
-        for (int x = 0; x < gridManager.width; x++)
+        for (int x = 0; x < GridManager.Instance.width; x++)
         {
-            for (int y = 0; y < gridManager.height; y++)
+            for (int y = 0; y < GridManager.Instance.height; y++)
             {
-                GameObject currentPiece = gridManager.GetPieceAt(x, y);
+                GameObject currentPiece = GridManager.Instance.GetPieceAt(x, y);
                 if (currentPiece != null)
                 {
                     matches.UnionWith(GetMatchesForPiece(currentPiece));
@@ -55,7 +54,7 @@ public class MatchManager : MonoBehaviour
     // 특정 조각에 대해 매치를 검색
     private HashSet<GameObject> GetMatchesForPiece(GameObject piece)
     {
-        var gridManager = GridManager.Instance; // Singleton 사용
+
         HashSet<GameObject> matches = new HashSet<GameObject>();
         Vector2 index = piece.GetComponent<Piece>().index;
 
@@ -116,9 +115,9 @@ public class MatchManager : MonoBehaviour
     // 수직 매치 탐색
     private HashSet<GameObject> GetVerticalMatch(int x, int y)
     {
-        var gridManager = GridManager.Instance; // Singleton 사용
+
         HashSet<GameObject> match = new HashSet<GameObject>();
-        GameObject startPiece = gridManager.GetPieceAt(x, y);
+        GameObject startPiece = GridManager.Instance.GetPieceAt(x, y);
 
         
         if (startPiece.tag == "Wall")
@@ -127,9 +126,9 @@ public class MatchManager : MonoBehaviour
         }
 
         
-        for (int i = y; i < gridManager.height; i++)
+        for (int i = y; i < GridManager.Instance.height; i++)
         {
-            GameObject nextPiece = gridManager.GetPieceAt(x, i);
+            GameObject nextPiece = GridManager.Instance.GetPieceAt(x, i);
             if (nextPiece != null &&nextPiece.tag == startPiece.tag)
             {
                 match.Add(nextPiece);
@@ -142,7 +141,7 @@ public class MatchManager : MonoBehaviour
 
         for (int i = y; i >= 0; i--)
         {
-            GameObject nextPiece = gridManager.GetPieceAt(x, i);
+            GameObject nextPiece = GridManager.Instance.GetPieceAt(x, i);
             if (nextPiece != null && nextPiece.tag == startPiece.tag )
             {
                 match.Add(nextPiece);

@@ -17,9 +17,9 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     [Header("Game Settings")]
-    public float timeLimit = 120f; // Time limit for the game in seconds
-    public TextMeshProUGUI timerText; // UI Text to display the timer
-    public GameObject gameOverPanel; // UI Panel to show when the game is over
+    public float timeLimit = 120f; 
+    public TextMeshProUGUI timerText; 
+    public GameObject gameOverPanel; 
 
     private GameState currentState;
     private float remainingTime;
@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            //DontDestroyOnLoad(gameObject);
+            
         }
         else
         {
