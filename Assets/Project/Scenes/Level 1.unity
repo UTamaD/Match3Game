@@ -725,8 +725,8 @@ MonoBehaviour:
   selectSound: {fileID: 8300000, guid: a139391c0559a654ab35077e19f49077, type: 3}
   comboVoices:
   - {fileID: 8300000, guid: 28c23e77a15a51f40b9d71f81e2ea26f, type: 3}
-  - {fileID: 8300000, guid: c3b9a09dd71e57648bc5303a8bb6b1a9, type: 3}
-  - {fileID: 8300000, guid: d862cb2824e974a4cb347b686143d298, type: 3}
+  - {fileID: 8300000, guid: 89fdd88a990f098419751c4bd283497c, type: 3}
+  - {fileID: 8300000, guid: 24581975b4be08649933210ccfa85d61, type: 3}
   swapSound: {fileID: 8300000, guid: cc338215bd7489c4f8193f4bdcdb131d, type: 3}
   ItemButtonSound: {fileID: 8300000, guid: 39ec26f104615874b99f305b7ae857bf, type: 3}
   ItemsSounds:
@@ -734,9 +734,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 53d90b6e10359d7458c976d4ee4af4a4, type: 3}
   - {fileID: 8300000, guid: f5e5e9969d156f54cb0847db34bb7b1d, type: 3}
   ItemsVoices:
-  - {fileID: 8300000, guid: 9d55813010eee9a4797ca6f667ac89c6, type: 3}
-  - {fileID: 8300000, guid: 0654dac1f5c838d48bf9cf2eddf6311b, type: 3}
-  - {fileID: 8300000, guid: b34385b34a270de40bfdae57a13e6afb, type: 3}
+  - {fileID: 8300000, guid: 14310a634d68bca44930dca32dde4ff0, type: 3}
+  - {fileID: 8300000, guid: adc778c1ebb30d64789076eaa4274ad6, type: 3}
+  - {fileID: 8300000, guid: 8e28c175901e8bf498dda1c2d895b29b, type: 3}
 --- !u!4 &414677390
 Transform:
   m_ObjectHideFlags: 0
@@ -764,7 +764,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 0.7
+  m_Volume: 1
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -2889,7 +2889,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1282953397
 RectTransform:
   m_ObjectHideFlags: 0
