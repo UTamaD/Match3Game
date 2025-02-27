@@ -66,5 +66,5 @@ Unity를 활용한 Match 3 형식의 퍼즐게임입니다.
 
 ## 🎥 시연 영상
 [![프로젝트 시연](https://img.youtube.com/vi/W6GQMR1WnVY/0.jpg)]([https://youtu.be/W6GQMR1WnVY])
-)
+
 
