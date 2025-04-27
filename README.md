@@ -1,4 +1,4 @@
-# Match 3 Game
+# Desert Vault (Match 3 Game)
 > Unity를 활용한 Match 3 형식의 퍼즐 게임
 
 ## 📋 프로젝트 소개
